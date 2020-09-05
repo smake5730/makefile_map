@@ -22,6 +22,7 @@ LIBDIR:=$(BUILDRESULTS)/lib
 CFLAGS = -Wall -Wextra -I include
 STATIC_LIB_FLAGS = rcs
 DEPFLAGS = -MT $@ -MMD -MP -MF $*.d
+LDFLAGS = -Wl,-Map,multifile-program-distributed.map
 
 # By default, this Makefile produces release builds
 ifeq ($(DEBUG),1)
@@ -44,7 +45,7 @@ sourcefile = $(patsubst $(BUILDRESULTS)/%.o,%.c,$(1))
 %.o: %.c
 .SECONDEXPANSION:
 %.o: $$(call sourcefile,$$@) %.d | $$(@D)
-	$(Q)$(CC) $(CFLAGS) $(DEPFLAGS) -c $< -o $@
+	$(Q)$(CC) $(LDFLAGS) $(CFLAGS) $(DEPFLAGS) -c $< -o $@
 
 $(LIBDIR)/libmultifile_func.a: $(LIB_OBJECTS) | $(LIBDIR)
 	$(Q)$(AR) $(STATIC_LIB_FLAGS) $@ $^
