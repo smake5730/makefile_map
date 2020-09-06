@@ -22,17 +22,21 @@ LIBDIR:=$(BUILDRESULTS)/lib
 CFLAGS = -Wall -Wextra -I include
 STATIC_LIB_FLAGS = rcs
 DEPFLAGS = -MT $@ -MMD -MP -MF $*.d
-LDFLAGS = -Wl,-Map,multifile-program-distributed.map
+LDFLAGS += -Wl,-Map=buildresults/multifile-program-distributed.map
+#LDFLAGS := -Wl,-Map=build_results/m-p-d.map
 
 # By default, this Makefile produces release builds
 ifeq ($(DEBUG),1)
 CFLAGS += -Og
+RELEASE_TYPE = 'DEBUG'
 else
 CFLAGS += -O2
+RELEASE_TYPE = 'RELEASE'
 endif
 
 .PHONY: all
-all: $(BUILDRESULTS)/multifile-program-distributed
+all: $(BUILDRESULTS)/multifile-program-distributed $(BUILDRESULTS)/multifile-program-distributed.zip
+	@echo hello_world
 
 APP_SOURCES := src/multifile_main.c
 LIB_SOURCES := src/lib/multifile_func.c
@@ -54,7 +58,11 @@ $(LIBDIR)/libmultifile_func.a: $(LIB_OBJECTS) | $(LIBDIR)
 $(BUILDRESULTS)/multifile-program-distributed:| $(BUILDRESULTS)
 $(BUILDRESULTS)/multifile-program-distributed: $(LIBDIR)/libmultifile_func.a $(APP_OBJECTS)
 $(BUILDRESULTS)/multifile-program-distributed:
-	$(Q)$(CC) $(CFLAGS) $(APP_OBJECTS) -L$(LIBDIR) -lmultifile_func -o $@
+	$(Q)$(CC) $(CFLAGS) $(LDFLAGS) $(APP_OBJECTS) -L$(LIBDIR) -lmultifile_func -o $@
+
+$(BUILDRESULTS)/multifile-program-distributed.zip:
+	@echo hello_world
+	zip -r $(BUILDRESULTS)/multifile-program-distributed-$(RELEASE_TYPE).zip $(BUILDRESULTS)/multifile-program-distributed $(BUILDRESULTS)/multifile-program-distributed.map $(LIBDIR)\
 
 clean:
 	$(Q)$(RM) -r $(BUILDRESULTS)
